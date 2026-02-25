@@ -5,7 +5,7 @@ import {
   promptWithModelSuggestionRetry,
 } from "../../shared/model-suggestion-retry"
 import { formatDetailedError } from "./error-formatting"
-import { getAgentToolRestrictions } from "../../shared/agent-tool-restrictions"
+import { composeSubagentPromptTools } from "../../shared/prompt-tools"
 import { setSessionTools } from "../../shared/session-tools-store"
 import { createInternalAgentTextPart } from "../../shared/internal-initiator-marker"
 
@@ -37,18 +37,20 @@ export async function sendSyncPrompt(
     args: DelegateTaskArgs
     systemContent: string | undefined
     categoryModel: { providerID: string; modelID: string; variant?: string } | undefined
+    parentSessionID: string
     toastManager: { removeTask: (id: string) => void } | null | undefined
     taskId: string | undefined
   },
   deps: SendSyncPromptDeps = sendSyncPromptDeps
 ): Promise<string | null> {
   const allowTask = isPlanFamily(input.agentToUse)
-  const tools = {
-    task: allowTask,
-    call_omo_agent: true,
-    question: false,
-    ...getAgentToolRestrictions(input.agentToUse),
-  }
+  const tools = composeSubagentPromptTools({
+    agentName: input.agentToUse,
+    parentSessionID: input.parentSessionID,
+    allowTask,
+    allowCallOmoAgent: true,
+    allowQuestion: false,
+  })
   setSessionTools(input.sessionID, tools)
 
   const promptArgs = {

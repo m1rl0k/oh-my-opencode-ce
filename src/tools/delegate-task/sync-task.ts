@@ -100,6 +100,7 @@ export async function executeSyncTask(
 
     const promptError = await deps.sendSyncPrompt(client, {
       sessionID,
+      parentSessionID: parentContext.sessionID,
       agentToUse,
       args,
       systemContent,

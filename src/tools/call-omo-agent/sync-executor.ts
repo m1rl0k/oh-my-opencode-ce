@@ -1,7 +1,7 @@
 import type { CallOmoAgentArgs } from "./types"
 import type { PluginInput } from "@opencode-ai/plugin"
 import { log } from "../../shared"
-import { getAgentToolRestrictions } from "../../shared"
+import { composeSubagentPromptTools } from "../../shared"
 import { createOrGetSession } from "./session-creator"
 import { waitForCompletion } from "./completion-poller"
 import { processMessages } from "./message-processor"
@@ -49,11 +49,13 @@ export async function executeSync(
       path: { id: sessionID },
       body: {
         agent: args.subagent_type,
-        tools: {
-          ...getAgentToolRestrictions(args.subagent_type),
-          task: false,
-          question: false,
-        },
+        tools: composeSubagentPromptTools({
+          agentName: args.subagent_type,
+          parentSessionID: toolContext.sessionID,
+          allowTask: false,
+          allowCallOmoAgent: false,
+          allowQuestion: false,
+        }),
         parts: [{ type: "text", text: args.prompt }],
       },
     })

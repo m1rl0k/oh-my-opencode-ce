@@ -1,7 +1,12 @@
 import type { BackgroundTask, LaunchInput, ResumeInput } from "./types"
 import type { OpencodeClient, OnSubagentSessionCreated, QueueItem } from "./constants"
 import { TMUX_CALLBACK_DELAY_MS } from "./constants"
-import { log, getAgentToolRestrictions, promptWithModelSuggestionRetry, createInternalAgentTextPart } from "../../shared"
+import {
+  log,
+  composeSubagentPromptTools,
+  promptWithModelSuggestionRetry,
+  createInternalAgentTextPart,
+} from "../../shared"
 import { subagentSessions } from "../claude-code-session-state"
 import { getTaskToastManager } from "../task-toast-manager"
 import { isInsideTmux } from "../../shared/tmux"
@@ -138,12 +143,13 @@ export async function startTask(
       ...(launchModel ? { model: launchModel } : {}),
       ...(launchVariant ? { variant: launchVariant } : {}),
       system: input.skillContent,
-      tools: {
-        task: false,
-        call_omo_agent: true,
-        question: false,
-        ...getAgentToolRestrictions(input.agent),
-      },
+      tools: composeSubagentPromptTools({
+        agentName: input.agent,
+        parentSessionID: input.parentSessionID,
+        allowTask: false,
+        allowCallOmoAgent: true,
+        allowQuestion: false,
+      }),
       parts: [createInternalAgentTextPart(input.prompt)],
     },
   }).catch((error) => {
@@ -222,12 +228,13 @@ export async function resumeTask(
       agent: task.agent,
       ...(resumeModel ? { model: resumeModel } : {}),
       ...(resumeVariant ? { variant: resumeVariant } : {}),
-      tools: {
-        task: false,
-        call_omo_agent: true,
-        question: false,
-        ...getAgentToolRestrictions(task.agent),
-      },
+      tools: composeSubagentPromptTools({
+        agentName: task.agent,
+        parentSessionID: task.parentSessionID,
+        allowTask: false,
+        allowCallOmoAgent: true,
+        allowQuestion: false,
+      }),
       parts: [createInternalAgentTextPart(input.prompt)],
     },
   }).catch((error) => {
