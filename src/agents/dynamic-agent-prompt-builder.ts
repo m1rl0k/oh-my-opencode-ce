@@ -87,6 +87,37 @@ export function buildToolSelectionTable(
   ]
 
   if (tools.length > 0) {
+    const hasContextEngineIndexer = tools.some((t) => t.name.startsWith("context-engine-indexer_"))
+    const hasContextEngineMemory = tools.some((t) => t.name.startsWith("context-engine-memory_"))
+    const hasContextEngineSearch = tools.some((t) => t.name === "context-engine-indexer_search")
+    const hasContextEngineBatchSearch = tools.some((t) => t.name === "context-engine-indexer_batch_search")
+    const hasContextEngineSymbolGraph = tools.some((t) => t.name === "context-engine-indexer_symbol_graph")
+    const hasContextEngineBatchSymbolGraph = tools.some((t) => t.name === "context-engine-indexer_batch_symbol_graph")
+    const hasContextEngineContextSearch = tools.some((t) => t.name === "context-engine-indexer_context_search")
+    const hasContextEngineAnswer = tools.some((t) => t.name === "context-engine-indexer_context_answer")
+
+    if (hasContextEngineIndexer || hasContextEngineMemory) {
+      rows.push("- `context-engine-*` tools — **PREFERRED** — Use Context-Engine tools first for code intelligence when available")
+      if (hasContextEngineSearch) {
+        rows.push("- `context-engine-indexer_search` — **DEFAULT** — Primary entry point for code search/exploration before grep/glob")
+      }
+      if (hasContextEngineBatchSearch) {
+        rows.push("- `context-engine-indexer_batch_search` — **PARALLEL DEFAULT** — Use for multiple independent code searches in one call")
+      }
+      if (hasContextEngineSymbolGraph) {
+        rows.push("- `context-engine-indexer_symbol_graph` — **RELATIONSHIPS** — Use for callers/definitions/importers instead of heuristic grep")
+      }
+      if (hasContextEngineBatchSymbolGraph) {
+        rows.push("- `context-engine-indexer_batch_symbol_graph` — **PARALLEL RELATIONSHIPS** — Use for multiple symbol-graph queries in one call")
+      }
+      if (hasContextEngineContextSearch) {
+        rows.push("- `context-engine-indexer_context_search` — **CODE+MEMORY** — Use when team memory/notes may improve retrieval")
+      }
+      if (hasContextEngineAnswer) {
+        rows.push("- `context-engine-indexer_context_answer` — **EXPLANATION MODE** — Use for grounded answers with citations")
+      }
+    }
+
     const toolsDisplay = formatToolsForPrompt(tools)
     rows.push(`- ${toolsDisplay} — **FREE** — Not Complex, Scope Clear, No Implicit Assumptions`)
   }
