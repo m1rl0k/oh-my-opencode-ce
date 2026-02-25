@@ -4,7 +4,18 @@
  * true = tool allowed, false = tool denied.
  */
 
+/**
+ * Context-Engine MCP tools — granted to all agents that need code intelligence.
+ * Wildcard patterns match tool names prefixed by the MCP server name.
+ */
+const CONTEXT_ENGINE_MCP_TOOLS: Record<string, boolean> = {
+  "context-engine_*": true,
+  "context-engine-indexer_*": true,
+  "context-engine-memory_*": true,
+}
+
 const EXPLORATION_AGENT_DENYLIST: Record<string, boolean> = {
+  ...CONTEXT_ENGINE_MCP_TOOLS,
   write: false,
   edit: false,
   task: false,
@@ -17,6 +28,7 @@ const AGENT_RESTRICTIONS: Record<string, Record<string, boolean>> = {
   librarian: EXPLORATION_AGENT_DENYLIST,
 
   oracle: {
+    ...CONTEXT_ENGINE_MCP_TOOLS,
     write: false,
     edit: false,
     task: false,
@@ -36,10 +48,12 @@ const AGENT_RESTRICTIONS: Record<string, Record<string, boolean>> = {
   },
 
   "multimodal-looker": {
+    ...CONTEXT_ENGINE_MCP_TOOLS,
     read: true,
   },
 
   "sisyphus-junior": {
+    ...CONTEXT_ENGINE_MCP_TOOLS,
     task: false,
   },
 }
