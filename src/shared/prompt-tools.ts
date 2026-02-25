@@ -1,4 +1,5 @@
 import { getSessionTools } from "./session-tools-store"
+import { getAgentToolRestrictions } from "./agent-tool-restrictions"
 
 export type PromptToolPermission = boolean | "allow" | "deny" | "ask"
 
@@ -32,4 +33,28 @@ export function resolveInheritedPromptTools(
     return { ...sessionTools }
   }
   return normalizePromptTools(fallbackTools)
+}
+
+type ComposeSubagentPromptToolsInput = {
+  agentName: string
+  parentSessionID?: string
+  allowTask: boolean
+  allowCallOmoAgent?: boolean
+  allowQuestion?: boolean
+}
+
+export function composeSubagentPromptTools(
+  input: ComposeSubagentPromptToolsInput
+): Record<string, boolean> {
+  const inheritedTools = input.parentSessionID
+    ? resolveInheritedPromptTools(input.parentSessionID)
+    : undefined
+
+  return {
+    ...(inheritedTools ?? {}),
+    task: input.allowTask,
+    call_omo_agent: input.allowCallOmoAgent ?? true,
+    question: input.allowQuestion ?? false,
+    ...getAgentToolRestrictions(input.agentName),
+  }
 }
