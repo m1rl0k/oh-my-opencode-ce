@@ -1,7 +1,7 @@
 import type { AgentConfig } from "@opencode-ai/sdk"
 import type { AgentMode, AgentPromptMetadata } from "./types"
 import { isGptModel } from "./types"
-import { createAgentToolRestrictions } from "../shared/permission-compat"
+import { createAgentToolRestrictions, CE_MCP_TOOL_PERMISSIONS } from "../shared/permission-compat"
 
 const MODE: AgentMode = "subagent"
 
@@ -149,6 +149,7 @@ export function createOracleAgent(model: string): AgentConfig {
     "apply_patch",
     "task",
   ])
+  restrictions.permission = { ...restrictions.permission, ...CE_MCP_TOOL_PERMISSIONS }
 
   const base = {
     description:

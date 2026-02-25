@@ -1,6 +1,6 @@
 import type { AgentConfig } from "@opencode-ai/sdk"
 import type { AgentMode, AgentPromptMetadata } from "./types"
-import { createAgentToolRestrictions } from "../shared/permission-compat"
+import { createAgentToolRestrictions, CE_MCP_TOOL_PERMISSIONS } from "../shared/permission-compat"
 
 const MODE: AgentMode = "subagent"
 
@@ -32,6 +32,8 @@ export function createExploreAgent(model: string): AgentConfig {
     "task",
     "call_omo_agent",
   ])
+  // Merge CE MCP allows after the deny list so they override built-in "*": "deny"
+  restrictions.permission = { ...restrictions.permission, ...CE_MCP_TOOL_PERMISSIONS }
 
   return {
     description:

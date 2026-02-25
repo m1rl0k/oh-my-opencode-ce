@@ -9,6 +9,19 @@ function agentByKey(agentResult: Record<string, unknown>, key: string): AgentWit
     | undefined;
 }
 
+/**
+ * Context-Engine MCP tool permission overrides.
+ * OpenCode's built-in explore agent has "*": "deny" in its permission ruleset.
+ * The LLM layer (llm.ts) calls PermissionNext.disabled() with ONLY the agent's
+ * permission (not merged session permissions), so MCP tools get removed before
+ * the model ever sees them. These wildcard allows override the deny-all for CE tools.
+ */
+const CE_MCP_PERMISSION: Record<string, string> = {
+  "context-engine-indexer_*": "allow",
+  "context-engine-memory_*": "allow",
+  "context-engine_*": "allow",
+};
+
 export function applyToolConfig(params: {
   config: Record<string, unknown>;
   pluginConfig: OhMyOpenCodeConfig;
@@ -36,11 +49,11 @@ export function applyToolConfig(params: {
 
   const librarian = agentByKey(params.agentResult, "librarian");
   if (librarian) {
-    librarian.permission = { ...librarian.permission, "grep_app_*": "allow" };
+    librarian.permission = { ...librarian.permission, "grep_app_*": "allow", ...CE_MCP_PERMISSION };
   }
   const looker = agentByKey(params.agentResult, "multimodal-looker");
   if (looker) {
-    looker.permission = { ...looker.permission, task: "deny", look_at: "deny" };
+    looker.permission = { ...looker.permission, task: "deny", look_at: "deny", ...CE_MCP_PERMISSION };
   }
   const atlas = agentByKey(params.agentResult, "atlas");
   if (atlas) {
@@ -51,6 +64,7 @@ export function applyToolConfig(params: {
       "task_*": "allow",
       teammate: "allow",
       ...denyTodoTools,
+      ...CE_MCP_PERMISSION,
     };
   }
   const sisyphus = agentByKey(params.agentResult, "sisyphus");
@@ -63,6 +77,7 @@ export function applyToolConfig(params: {
       "task_*": "allow",
       teammate: "allow",
       ...denyTodoTools,
+      ...CE_MCP_PERMISSION,
     };
   }
   const hephaestus = agentByKey(params.agentResult, "hephaestus");
@@ -73,6 +88,7 @@ export function applyToolConfig(params: {
       task: "allow",
       question: questionPermission,
       ...denyTodoTools,
+      ...CE_MCP_PERMISSION,
     };
   }
   const prometheus = agentByKey(params.agentResult, "prometheus");
@@ -85,6 +101,7 @@ export function applyToolConfig(params: {
       "task_*": "allow",
       teammate: "allow",
       ...denyTodoTools,
+      ...CE_MCP_PERMISSION,
     };
   }
   const junior = agentByKey(params.agentResult, "sisyphus-junior");
@@ -95,7 +112,24 @@ export function applyToolConfig(params: {
       "task_*": "allow",
       teammate: "allow",
       ...denyTodoTools,
+      ...CE_MCP_PERMISSION,
     };
+  }
+  const explore = agentByKey(params.agentResult, "explore");
+  if (explore) {
+    explore.permission = { ...explore.permission, ...CE_MCP_PERMISSION };
+  }
+  const oracle = agentByKey(params.agentResult, "oracle");
+  if (oracle) {
+    oracle.permission = { ...oracle.permission, ...CE_MCP_PERMISSION };
+  }
+  const momus = agentByKey(params.agentResult, "momus");
+  if (momus) {
+    momus.permission = { ...momus.permission, ...CE_MCP_PERMISSION };
+  }
+  const metis = agentByKey(params.agentResult, "metis");
+  if (metis) {
+    metis.permission = { ...metis.permission, ...CE_MCP_PERMISSION };
   }
 
   params.config.permission = {
@@ -103,5 +137,6 @@ export function applyToolConfig(params: {
     webfetch: "allow",
     external_directory: "allow",
     task: "deny",
+    ...CE_MCP_PERMISSION,
   };
 }

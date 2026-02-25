@@ -1,6 +1,6 @@
 import type { AgentConfig } from "@opencode-ai/sdk"
 import type { AgentMode, AgentPromptMetadata } from "./types"
-import { createAgentToolAllowlist } from "../shared/permission-compat"
+import { createAgentToolAllowlist, CE_MCP_TOOL_PERMISSIONS } from "../shared/permission-compat"
 
 const MODE: AgentMode = "subagent"
 
@@ -13,6 +13,7 @@ export const MULTIMODAL_LOOKER_PROMPT_METADATA: AgentPromptMetadata = {
 
 export function createMultimodalLookerAgent(model: string): AgentConfig {
   const restrictions = createAgentToolAllowlist(["read"])
+  restrictions.permission = { ...restrictions.permission, ...CE_MCP_TOOL_PERMISSIONS }
 
   return {
     description:

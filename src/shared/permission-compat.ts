@@ -40,6 +40,17 @@ export function createAgentToolAllowlist(
 }
 
 /**
+ * Context-Engine MCP tool permission allows.
+ * Overrides the built-in "*": "deny" in agents like explore so that
+ * CE MCP tools are visible to the LLM (not filtered by PermissionNext.disabled()).
+ */
+export const CE_MCP_TOOL_PERMISSIONS: Record<string, PermissionValue> = {
+  "context-engine-indexer_*": "allow",
+  "context-engine-memory_*": "allow",
+  "context-engine_*": "allow",
+}
+
+/**
  * Converts legacy tools format to permission format.
  * For migrating user configs from older versions.
  */

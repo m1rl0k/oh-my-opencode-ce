@@ -1,6 +1,6 @@
 import type { AgentConfig } from "@opencode-ai/sdk"
 import type { AgentMode, AgentPromptMetadata } from "./types"
-import { createAgentToolRestrictions } from "../shared/permission-compat"
+import { createAgentToolRestrictions, CE_MCP_TOOL_PERMISSIONS } from "../shared/permission-compat"
 
 const MODE: AgentMode = "subagent"
 
@@ -303,6 +303,7 @@ const metisRestrictions = createAgentToolRestrictions([
   "apply_patch",
   "task",
 ])
+metisRestrictions.permission = { ...metisRestrictions.permission, ...CE_MCP_TOOL_PERMISSIONS }
 
 export function createMetisAgent(model: string): AgentConfig {
   return {
