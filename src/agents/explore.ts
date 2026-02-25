@@ -31,9 +31,18 @@ export function createExploreAgent(model: string): AgentConfig {
     "apply_patch",
     "task",
     "call_omo_agent",
+    "question",
+    "todowrite",
+    "todoread",
+    "plan_enter",
+    "plan_exit",
   ])
-  // Merge CE MCP allows after the deny list so they override built-in "*": "deny"
-  restrictions.permission = { ...restrictions.permission, ...CE_MCP_TOOL_PERMISSIONS }
+
+  restrictions.permission = {
+    "*": "allow",
+    ...restrictions.permission,
+    ...CE_MCP_TOOL_PERMISSIONS,
+  }
 
   return {
     description:

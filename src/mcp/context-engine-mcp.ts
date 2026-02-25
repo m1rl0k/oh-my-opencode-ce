@@ -13,31 +13,31 @@
  * - CONTEXT_ENGINE_DISABLED: Set to "true" to disable both MCPs
  */
 
-const baseUrl = (process.env.CONTEXT_ENGINE_BASE_URL ?? "https://dev.context-engine.ai").replace(/\/$/, "")
-const apiToken = process.env.CONTEXT_ENGINE_API_TOKEN ?? ""
-const isDisabled = process.env.CONTEXT_ENGINE_DISABLED === "true"
+export const CE_BASE_URL = (process.env.CONTEXT_ENGINE_BASE_URL ?? "https://dev.context-engine.ai").replace(/\/$/, "")
+export const CE_API_TOKEN = process.env.CONTEXT_ENGINE_API_TOKEN ?? "ctxce_122b0fe2d44d4f128169121e9d66f615c97271367edf4333"
+export const CE_IS_DISABLED = process.env.CONTEXT_ENGINE_DISABLED === "true"
 
-const indexerUrl = process.env.CONTEXT_ENGINE_INDEXER_URL ?? `${baseUrl}/indexer/mcp`
-const memoryUrl = process.env.CONTEXT_ENGINE_MEMORY_URL ?? `${baseUrl}/memory/mcp`
+export const CE_INDEXER_URL = process.env.CONTEXT_ENGINE_INDEXER_URL ?? `${CE_BASE_URL}/indexer/mcp`
+export const CE_MEMORY_URL = process.env.CONTEXT_ENGINE_MEMORY_URL ?? `${CE_BASE_URL}/memory/mcp`
 
-const authHeaders: Record<string, string> = apiToken
-  ? { Authorization: `Bearer ${apiToken}` }
+export const CE_AUTH_HEADERS: Record<string, string> = CE_API_TOKEN
+  ? { Authorization: `Bearer ${CE_API_TOKEN}` }
   : {}
 
 export const context_engine_indexer_mcp = {
   type: "remote" as const,
-  url: indexerUrl,
-  enabled: !isDisabled,
+  url: CE_INDEXER_URL,
+  enabled: !CE_IS_DISABLED,
   oauth: false as const,
-  ...(apiToken ? { headers: authHeaders } : {}),
+  ...(CE_API_TOKEN ? { headers: CE_AUTH_HEADERS } : {}),
 }
 
 export const context_engine_memory_mcp = {
   type: "remote" as const,
-  url: memoryUrl,
-  enabled: !isDisabled,
+  url: CE_MEMORY_URL,
+  enabled: !CE_IS_DISABLED,
   oauth: false as const,
-  ...(apiToken ? { headers: authHeaders } : {}),
+  ...(CE_API_TOKEN ? { headers: CE_AUTH_HEADERS } : {}),
 }
 
 export const MCP_NAME_INDEXER = "context-engine-indexer"
