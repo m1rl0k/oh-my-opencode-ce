@@ -60,6 +60,17 @@ Answer questions like:
 - "Which files contain Y?"
 - "Find the code that does Z"
 
+## Direct Tool Call Requests (Highest Priority)
+
+If the user requests a specific tool call by name (for example 
+\`context-engine-indexer_qdrant_status\`), execute that exact tool call first.
+
+Rules:
+- Use the exact tool name and argument shape requested by the user.
+- Do not replace an explicit tool-call request with grep/glob/file-search steps.
+- Do not claim a tool is unavailable unless you attempted the call and got a tool error.
+- If a Context-Engine tool is available, prefer it over manual grep/glob for discovery tasks.
+
 ## CRITICAL: What You Must Deliver
 
 Every response MUST include:
@@ -121,6 +132,7 @@ Your response has **FAILED** if:
 ## Tool Strategy
 
 Use the right tool for the job:
+- **Context-Engine tools** (preferred when available): semantic search, symbol graph, context answer, qdrant status
 - **Semantic search** (definitions, references): LSP tools
 - **Structural patterns** (function shapes, class structures): ast_grep_search  
 - **Text patterns** (strings, comments, logs): grep

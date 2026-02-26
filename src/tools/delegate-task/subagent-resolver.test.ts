@@ -79,4 +79,39 @@ describe("resolveSubagentExecution", () => {
       error: "network timeout",
     })
   })
+
+  test("reroutes explore context-engine tool requests to Sisyphus-Junior", async () => {
+    const args = createBaseArgs({
+      subagent_type: "explore",
+      prompt:
+        "Call context-engine-indexer_qdrant_status with list_all=true and include_status=false",
+    })
+
+    const executorCtx = createExecutorContext(async () => [
+      { name: "explore", mode: "subagent" },
+      { name: "Sisyphus-Junior", mode: "subagent" },
+    ])
+
+    const result = await resolveSubagentExecution(args, executorCtx, "sisyphus", "quick")
+
+    expect(result.error).toBeUndefined()
+    expect(result.agentToUse).toBe("Sisyphus-Junior")
+  })
+
+  test("keeps explore agent for non-context-engine requests", async () => {
+    const args = createBaseArgs({
+      subagent_type: "explore",
+      prompt: "Find where authentication middleware is implemented",
+    })
+
+    const executorCtx = createExecutorContext(async () => [
+      { name: "explore", mode: "subagent" },
+      { name: "Sisyphus-Junior", mode: "subagent" },
+    ])
+
+    const result = await resolveSubagentExecution(args, executorCtx, "sisyphus", "quick")
+
+    expect(result.error).toBeUndefined()
+    expect(result.agentToUse).toBe("explore")
+  })
 })

@@ -11,6 +11,11 @@ import { getAvailableModelsForDelegateTask } from "./available-models"
 import type { FallbackEntry } from "../../shared/model-requirements"
 import { resolveModelForDelegateTask } from "./model-selection"
 
+function requestsContextEngineTool(prompt: string | undefined): boolean {
+  if (!prompt) return false
+  return /(?:^|\b)(?:mcp_)?context-engine(?:-indexer|-memory)?_[a-z0-9_]+/i.test(prompt)
+}
+
 export async function resolveSubagentExecution(
   args: DelegateTaskArgs,
   executorCtx: ExecutorContext,
@@ -24,6 +29,21 @@ export async function resolveSubagentExecution(
   }
 
   const agentName = args.subagent_type.trim()
+
+  const shouldRerouteExploreToJunior =
+    agentName.toLowerCase() === "explore" && requestsContextEngineTool(args.prompt)
+
+  if (shouldRerouteExploreToJunior) {
+    log("[delegate-task] rerouting explore CE tool request to sisyphus-junior", {
+      requestedAgent: agentName,
+      targetAgent: SISYPHUS_JUNIOR_AGENT,
+    })
+  }
+
+  const requestedAgentName = agentName
+  const effectiveAgentName = shouldRerouteExploreToJunior
+    ? SISYPHUS_JUNIOR_AGENT
+    : agentName
 
   if (agentName.toLowerCase() === SISYPHUS_JUNIOR_AGENT.toLowerCase()) {
     return {
@@ -45,7 +65,7 @@ Create the work plan directly - that's your job as the planning agent.`,
     }
   }
 
-  let agentToUse = agentName
+  let agentToUse = effectiveAgentName
   let categoryModel: { providerID: string; modelID: string; variant?: string } | undefined
   let fallbackChain: FallbackEntry[] | undefined = undefined
 
@@ -126,7 +146,7 @@ Create the work plan directly - that's your job as the planning agent.`,
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : String(error)
     log("[delegate-task] Failed to resolve subagent execution", {
-      requestedAgent: agentToUse,
+      requestedAgent: requestedAgentName,
       parentAgent,
       error: errorMessage,
     })
